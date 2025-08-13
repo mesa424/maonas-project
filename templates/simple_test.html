@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Template Test</title>
+</head>
+<body>
+    <h1>Template Test - Success!</h1>
+    
+    <h2>Tables Available:</h2>
+    <ul>
+        {% for table_key, table_name in tables.items() %}
+        <li>{{ table_key }}: {{ table_name }}</li>
+        {% endfor %}
+    </ul>
+    
+    <p>If you see this page, the template system is working correctly.</p>
+    <p>The issue is likely in the database_overview.html template syntax.</p>
+</body>
+</html>

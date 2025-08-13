@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Maonas Database{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Main header -->
+    <div class="text-center mb-5">
+        <h1 class="main-header">Welcome to the Maonas Database</h1>
+    </div>
+    
+    <!-- Project description -->
+    <div class="info-card">
+        <p>
+            The Maonas Database is a comprehensive digital repository documenting maritime activities, 
+            trade networks, and economic transactions in the Mediterranean during the late medieval and 
+            early modern periods. This database provides researchers with powerful tools to analyze 
+            historical maritime commerce, social networks, and economic patterns.
+        </p>
+        <p>
+            Our database contains detailed records of vessels, legal acts, individuals, organizations, 
+            trade goods, prices, and exchange rates, offering unprecedented insights into the complex 
+            world of medieval Mediterranean commerce.
+        </p>
+    </div>
+    
+    <!-- Contextual image placeholder -->
+    <div class="info-card text-center py-5">
+        <img src="{{ url_for('static', filename='images/maritime_context.jpg') }}" 
+             alt="Maritime Historical Context" 
+             class="img-fluid" 
+             style="max-height: 400px;"
+             onerror="this.outerHTML='<p class=text-muted><em>Historical maritime illustration will be displayed here</em><br><small>Please add your contextual image to static/images/maritime_context.jpg</small></p>'">
+    </div>
+    
+    <!-- Navigation sections -->
+    <div class="row mt-5">
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h3 class="section-header">Database Overview</h3>
+                <p>
+                    Browse and search through the main database tables including individuals, legal acts, 
+                    vessels, organizations, and economic data. Access comprehensive records with 
+                    user-friendly search and export capabilities.
+                </p>
+                <a href="{{ url_for('database_overview') }}" class="btn btn-primary">
+                    Explore Database
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h3 class="section-header">Analysis Tools</h3>
+                <p>
+                    Access advanced social network analysis and econometric tools to uncover patterns 
+                    and relationships in the historical data. Powerful analytical capabilities for 
+                    researchers and scholars.
+                </p>
+                <a href="{{ url_for('analysis_tools') }}" class="btn btn-primary">
+                    Analysis Tools
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h3 class="section-header">Research Team</h3>
+                <p>
+                    Meet the researchers and institutions behind the Maonas Database project. 
+                    Learn about our collaborative approach to maritime historical research 
+                    and digital humanities.
+                </p>
+                <a href="{{ url_for('team') }}" class="btn btn-primary">
+                    Meet the Team
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h3 class="section-header">Getting Started</h3>
+                <p>
+                    New to the database? Start with the Database Overview to familiarize yourself 
+                    with the available data, then explore our analysis tools for deeper insights 
+                    into maritime historical patterns.
+                </p>
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <strong>Quick Start:</strong> Database Overview → Choose a table → Search → Analyze
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Database statistics section -->
+    <div class="info-card mt-4">
+        <h3 class="section-header">Database Statistics</h3>
+        <div class="row" id="database-stats">
+            <div class="col text-center">
+                <div class="loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading database statistics...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Partners and affiliations -->
+    <!-- Institutional partners -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="section-header text-center">Institutional Partners</h3>
+            
+                <div class="row mt-4">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="info-card text-center py-4">
+                            <img src="{{ url_for('static', filename='/images/partner_logos/DHI_Logo_web.png') }}" alt="Partner 1 Logo" class="img-fluid" style="max-width:135px; height:auto;">
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="info-card text-center py-4">
+                            <img src="{{ url_for('static', filename='/images/partner_logos/uni-trier-logo.jpg') }}" alt="Partner 2 Logo" class="img-fluid" >
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="info-card text-center py-4">
+                            <img src="{{ url_for('static', filename='/images/partner_logos/University-of-Teramo.png') }}" alt="Partner 3 Logo" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="info-card text-center py-4">
+                            <img src="{{ url_for('static', filename='/images/partner_logos/Uni_Logo_2016.jpg') }}" alt="Partner 4 Logo" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Load database statistics on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/api/database/stats')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('database-stats').innerHTML = 
+                        '<div class="col"><p class="text-danger">Error loading statistics</p></div>';
+                    return;
+                }
+                
+                let statsHtml = '';
+                const tableNames = {
+                    'imt': 'Individuals',
+                    'legal_acts': 'Legal Acts',
+                    'vessel': 'Vessels',
+                    'org': 'Organizations',
+                    'good_price': "Goods' Prices",
+                    'exchange_rates': 'Exchange Rates',
+                    'equivalency': 'Equivalencies'
+                };
+                
+                let totalRecords = 0;
+                Object.keys(data).forEach(table => {
+                    if (tableNames[table]) {
+                        totalRecords += data[table];
+                        statsHtml += `
+                            <div class="col-md-3 col-sm-6 mb-3">
+                                <div class="text-center">
+                                    <h4 class="text-primary">${data[table].toLocaleString()}</h4>
+                                    <p class="mb-0">${tableNames[table]}</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                // Add total records
+                statsHtml = `
+                    <div class="col-12 mb-4">
+                        <div class="text-center">
+                            <h2 class="text-primary">${totalRecords.toLocaleString()}</h2>
+                            <p class="lead">Total Records in Database</p>
+                        </div>
+                    </div>
+                ` + statsHtml;
+                
+                document.getElementById('database-stats').innerHTML = statsHtml;
+            })
+            .catch(error => {
+                document.getElementById('database-stats').innerHTML = 
+                    '<div class="col"><p class="text-warning">Statistics temporarily unavailable</p></div>';
+            });
+    });
+</script>
+{% endblock %}

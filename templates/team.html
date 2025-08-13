@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Team - Maonas Database{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Page header -->
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1 class="page-header">Meet Our Team</h1>
+            <p class="lead">
+                The Maonas Database project is the result of collaborative efforts between researchers, 
+                historians, and digital humanities specialists from various institutions.
+            </p>
+        </div>
+    </div>
+    
+    <!-- Team members -->
+<div class="row mt-4">
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="info-card team-card">
+            <div class="team-name">Andrés Mesa</div>
+            <div class="team-title">Principal Investigator</div>
+            <div class="team-affiliation">Universität Trier</div>
+
+            <div class="contact-info mt-3">
+                <div class="mb-2">
+                    <a href="mailto:mesa.andres@proton.me" class="btn btn-outline-primary btn-sm">
+                        Email
+                    </a>
+                </div>
+                <div>
+                    <a href="https://uni-trier.academia.edu/AndresMesa" target="_blank" class="btn btn-outline-secondary btn-sm">
+                        Website
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+    <!-- Call for collaboration -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="info-card text-center">
+                <h3 class="section-header">Join Our Research Community</h3>
+                <p>
+                    We welcome collaboration from researchers interested in economic history, maritime history, digital humanities, 
+                    and database development. Our interdisciplinary approach combines traditional historical 
+                    research with cutting-edge computational methods.
+                </p>
+                <p>
+                    Contact us to learn about opportunities to contribute to the project, access research data, 
+                    or explore collaborative research initiatives.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Research areas -->
+    <div class="row mt-4">
+        <div class="col-md-4 mb-3">
+            <div class="info-card">
+                <h4 class="section-header">Maritime History</h4>
+                <p>
+                    Specialists in maritime commerce, trade networks, 
+                    and economic history during the medieval and early modern periods.
+                </p>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="info-card">
+                <h4 class="section-header">Digital Humanities</h4>
+                <p>
+                    Experts in database design, data visualization, and computational 
+                    methods for historical research and analysis.
+                </p>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="info-card">
+                <h4 class="section-header">Data Science</h4>
+                <p>
+                    Researchers applying social network analysis, econometric methods, 
+                    and statistical modeling to historical datasets.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Institutional partners -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="section-header text-center">Institutional Partners</h3>
+            
+                <div class="row mt-4">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="info-card text-center py-4">
+                            <img src="{{ url_for('static', filename='/images/partner_logos/DHI_Logo_web.png') }}" alt="Partner 1 Logo" class="img-fluid" style="max-width:135px; height:auto;">
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="info-card text-center py-4">
+                            <img src="{{ url_for('static', filename='/images/partner_logos/uni-trier-logo.jpg') }}" alt="Partner 2 Logo" class="img-fluid" >
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="info-card text-center py-4">
+                            <img src="{{ url_for('static', filename='/images/partner_logos/University-of-Teramo.png') }}" alt="Partner 3 Logo" class="img-fluid">
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="info-card text-center py-4">
+                            <img src="{{ url_for('static', filename='/images/partner_logos/Uni_Logo_2016.jpg') }}" alt="Partner 4 Logo" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact information -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="info-card">
+                <h3 class="section-header">Project Contact</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>General Inquiries</h5>
+                        <p>
+                            For general questions about the Maonas Database project, 
+                            data access, or collaboration opportunities.
+                        </p>
+                        <p>
+                            <strong>Email:</strong> info@maonas-database.org<br>                        
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Technical Support</h5>
+                        <p>
+                            For technical questions about database access, 
+                            API usage, or analytical tools.
+                        </p>
+                        <p>
+                            <strong>Email:</strong> support@maonas-database.org<br>
+                            <strong>Documentation:</strong> <a href="#" class="text-decoration-none">Technical Docs</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Funding and acknowledgments -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="info-card">
+                <h3 class="section-header">Acknowledgments</h3>
+                <p>
+                    This project is supported by generous funding from [Funding Agency Names]. 
+                    We gratefully acknowledge the contributions of archival institutions, 
+                    libraries, and individual researchers who have made their data and 
+                    expertise available for this collaborative endeavor.
+                </p>
+                <p class="text-muted">
+                    <small>
+                        The Maonas Database project is committed to open science principles 
+                        and collaborative research practices.
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

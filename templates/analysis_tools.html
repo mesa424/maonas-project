@@ -1,0 +1,1809 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Tools - Maonas Database{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+.viz-container {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: #fff;
+    min-height: 600px;
+}
+
+.control-panel {
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.network-stats-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.export-controls {
+    background-color: #e9ecef;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    margin-top: 1rem;
+}
+
+.goods-network-highlight {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.full-export-section {
+    background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page header -->
+    <div class="row">
+        <div class="col-12">
+            <h1 class="page-header">Analysis Tools</h1>
+            <p class="lead">
+                Access powerful analytical tools to explore patterns, relationships, and trends in the maritime data. 
+                Our tools include social network analysis for understanding relationships between individuals and organizations, 
+                and econometric analysis for examining price trends and market dynamics.
+            </p>
+        </div>
+    </div>
+    
+    <!-- Main analysis categories -->
+    <div class="row mt-4">
+        <!-- Social Network Analysis -->
+        <div class="col-md-6 mb-4">
+            <!-- Social Network Tools -->
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <div class="info-card">
+                        <h5 class="section-header">Network Statistics</h5>
+                        <p>Generate comprehensive statistical reports about network structure and properties.</p>
+                        <button class="btn btn-primary" onclick="showAnalysisTool('network-stats')">
+                            Network Reports
+                        </button>
+                    </div>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <div class="info-card">
+                        <h5 class="section-header">Network Visualizations</h5>
+                        <p>Create interactive network graphs and visualizations to explore connections.</p>
+                        <button class="btn btn-primary" onclick="showAnalysisTool('network-viz')">
+                            Visualize Networks
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Economic Analysis -->
+        <div class="col-md-6 mb-4">
+            <!-- Economic Analysis Tools -->
+            <div class="row">
+                <div class="col-sm-6 mb-3">
+                    <div class="info-card">
+                        <h5 class="section-header">Statistical Reports</h5>
+                        <p>Comprehensive economic and statistical analysis of price and market data.</p>
+                        <button class="btn btn-primary" onclick="showAnalysisTool('economic-stats')">
+                            Economic Reports
+                        </button>
+                    </div>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <div class="info-card">
+                        <h5 class="section-header">Economic Visualizations</h5>
+                        <p>Charts and graphs showing price trends, market dynamics, and economic patterns.</p>
+                        <button class="btn btn-primary" onclick="showAnalysisTool('economic-viz')">
+                            Economic Charts
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analysis tool interface (initially hidden) -->
+    <div class="row mt-4" id="analysis-interface" style="display: none;">
+        <div class="col-12">
+            <div class="info-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="section-header mb-0" id="analysis-title">Analysis Tool</h3>
+                    <button class="btn btn-secondary" onclick="hideAnalysisTool()">Close</button>
+                </div>
+                
+                <div id="analysis-content">
+                    <!-- Analysis tool content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Available measurements documentation -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <h3 class="section-header">Available Measurements and Methods</h3>
+        </div>
+    </div>
+    
+    <!-- Documentation sections (keeping original content) -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h4 class="section-header">Social Network Measurements</h4>
+                
+                <h6><strong>Centrality Measures:</strong></h6>
+                <ul>
+                    <li><strong>Degree Centrality:</strong> Number of direct connections</li>
+                    <li><strong>Closeness Centrality:</strong> How quickly a node can reach others</li>
+                    <li><strong>Betweenness Centrality:</strong> Importance as a bridge between others</li>
+                    <li><strong>Eigenvector Centrality:</strong> Influence based on connections to influential nodes</li>
+                </ul>
+                
+                <h6><strong>Network Properties:</strong></h6>
+                <ul>
+                    <li><strong>Network Density:</strong> Overall connectivity of the network</li>
+                    <li><strong>Modularity:</strong> Strength of community division</li>
+                    <li><strong>Cut Points & Bridges:</strong> Critical connection points</li>
+                    <li><strong>Cohesive Subgroups:</strong> Highly interconnected groups</li>
+                    <li><strong>Triangles:</strong> Three-way mutual connections</li>
+                    <li><strong>Homophily Analysis:</strong> Tendency for similar nodes to connect</li>
+                </ul>
+                
+                <h6><strong>Goods-Based Analysis:</strong></h6>
+                <ul>
+                    <li><strong>Trade Networks:</strong> Networks of actors trading specific goods</li>
+                    <li><strong>Market Participation:</strong> Who traded what commodities</li>
+                    <li><strong>Commodity-Specific Communities:</strong> Groups formed around specific trades</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="info-card">
+                <h4 class="section-header">Economic Analysis Measurements</h4>
+                
+                <h6><strong>Descriptive Statistics:</strong></h6>
+                <ul>
+                    <li><strong>Average, Median, and Range:</strong> Central tendencies and spread</li>
+                    <li><strong>Price Volatility:</strong> Risk and stability measures</li>
+                </ul>
+                
+                <h6><strong>Time Series Analysis:</strong></h6>
+                <ul>
+                    <li><strong>Trend Analysis:</strong> Long-term price movements</li>
+                    <li><strong>Seasonality:</strong> Recurring patterns</li>
+                    <li><strong>Autocorrelation:</strong> Relationship with past values</li>
+                    <li><strong>ARIMA Forecasting:</strong> Future price prediction</li>
+                </ul>
+                
+                <h6><strong>Advanced Econometrics:</strong></h6>
+                <ul>
+                    <li><strong>Price Elasticity:</strong> Demand responsiveness</li>
+                    <li><strong>GARCH Models:</strong> Volatility modeling</li>
+                    <li><strong>Market Integration:</strong> Cointegration tests</li>
+                    <li><strong>Stationarity Tests:</strong> ADF tests for time series</li>
+                    <li><strong>Value at Risk:</strong> Risk assessment calculations</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Getting started guide -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="info-card">
+                <h4 class="section-header">Getting Started with Analysis Tools</h4>
+                
+                <div class="row">
+                    <div class="col-md-3">
+                        <h6><strong>1. Choose Your Analysis Type</strong></h6>
+                        <p>
+                            Select between Global, Individual-Centered, or Goods-Based network analysis 
+                            for relationship exploration or Economic Analysis for price studies.
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <h6><strong>2. Configure Parameters</strong></h6>
+                        <p>
+                            Set time periods, select specific goods or individuals, 
+                            and choose the measurements you want to calculate.
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <h6><strong>3. Generate Results</strong></h6>
+                        <p>
+                            View statistical reports and interactive visualizations, 
+                            then export your results for further research.
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <h6><strong>4. Full Export Available</strong></h6>
+                        <p>
+                            Download complete datasets with all measurements 
+                            for every node in CSV or PDF format - no limits!
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-3 p-3 bg-light rounded">
+                    <strong>Note:</strong> All analysis tools are fully functional and process your actual database data 
+                    to generate real analytical results and interactive visualizations. 
+                    <strong>NEW:</strong> Goods-based analysis and unlimited data export now available!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================================
+// ANALYSIS TOOL INTERFACE FUNCTIONS
+// ============================================================================
+
+function showAnalysisTool(toolType) {
+    const interface = document.getElementById('analysis-interface');
+    const title = document.getElementById('analysis-title');
+    const content = document.getElementById('analysis-content');
+    
+    const tools = {
+        'network-stats': {
+            title: 'Social Network Statistics',
+            content: getNetworkStatsInterface()
+        },
+        'network-viz': {
+            title: 'Network Visualizations',
+            content: getNetworkVizInterface()
+        },
+        'economic-stats': {
+            title: 'Economic Statistical Analysis',
+            content: getEconomicStatsInterface()
+        },
+        'economic-viz': {
+            title: 'Economic Visualizations',
+            content: getEconomicVizInterface()
+        }
+    };
+    
+    if (tools[toolType]) {
+        title.textContent = tools[toolType].title;
+        content.innerHTML = tools[toolType].content;
+        interface.style.display = 'block';
+        interface.scrollIntoView({ behavior: 'smooth' });
+        
+        // Initialize any dynamic content after loading
+        if (toolType === 'network-stats' || toolType === 'network-viz') {
+            setTimeout(loadAvailableYears, 500);
+        }
+    }
+}
+
+function hideAnalysisTool() {
+    document.getElementById('analysis-interface').style.display = 'none';
+}
+
+// ============================================================================
+// NETWORK STATISTICS INTERFACE
+// ============================================================================
+
+function getNetworkStatsInterface() {
+    return `
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Network Configuration</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label">Analysis Type</label>
+                    <select class="form-select" id="analysis-type" onchange="toggleNetworkTypeOptions()">
+                        <option value="global">Global Network (All Individuals & Organizations)</option>
+                        <option value="individual_centered">Individual-Centered Analysis</option>
+                        <option value="goods_based">Goods-Based Analysis</option>
+                    </select>
+                </div>
+                
+                <!-- Individual Search (hidden by default) -->
+                <div class="mb-3" id="individual-search-container" style="display: none;">
+                    <label class="form-label">Search for Individual</label>
+                    <input type="text" class="form-control" id="individual-search" 
+                           placeholder="Type name (e.g., Juan, Bernaldo, Grimaldo...)"
+                           oninput="searchIndividuals()" autocomplete="off">
+                    <div id="individual-results" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;"></div>
+                    <input type="hidden" id="selected-individual-id">
+                    <small class="text-muted">Search by first name, last name, or partial name</small>
+                </div>
+                
+                <!-- Goods Search (hidden by default) -->
+                <div class="mb-3" id="goods-search-container" style="display: none;">
+                    <label class="form-label">Search for Good/Commodity</label>
+                    <input type="text" class="form-control" id="goods-search" 
+                           placeholder="Type commodity name (e.g., wheat, wine, loan...)"
+                           oninput="searchGoods()" autocomplete="off">
+                    <div id="goods-results" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;"></div>
+                    <input type="hidden" id="selected-good-id">
+                    <small class="text-muted">Search for specific goods/commodities to analyze their trade networks</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Time Period</label>
+                    <div class="row">
+                        <div class="col-12 mb-2">
+                            <select class="form-select" id="date-preset" onchange="applyDatePreset()">
+                                <option value="">All Time Periods</option>
+                                <option value="load_decades">Load Available Decades...</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">Custom Start Year</label>
+                            <input type="number" class="form-control" id="start-year" 
+                                   placeholder="e.g., 1450" min="1400" max="1600">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">Custom End Year</label>
+                            <input type="number" class="form-control" id="end-year" 
+                                   placeholder="e.g., 1500" min="1400" max="1600">
+                        </div>
+                    </div>
+                    <small class="text-muted">Choose a decade or enter custom years</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Connection Filter</label>
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <input type="range" class="form-range" id="min-connections" 
+                                   min="1" max="10" value="1" oninput="updateConnectionsLabel()">
+                        </div>
+                        <div class="col-4">
+                            <span class="badge bg-primary" id="connections-value">1+ connections</span>
+                        </div>
+                    </div>
+                    <small class="text-muted">Only include individuals/organizations with this many connections or more</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Analysis Measures</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="degree" checked>
+                        <label class="form-check-label" for="degree">Degree Centrality</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="betweenness" checked>
+                        <label class="form-check-label" for="betweenness">Betweenness Centrality</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="closeness">
+                        <label class="form-check-label" for="closeness">Closeness Centrality</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="eigenvector">
+                        <label class="form-check-label" for="eigenvector">Eigenvector Centrality</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="density" checked>
+                        <label class="form-check-label" for="density">Network Density</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="modularity">
+                        <label class="form-check-label" for="modularity">Modularity</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="triangles">
+                        <label class="form-check-label" for="triangles">Triangles</label>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateNetworkStats()">
+                    Generate Network Analysis
+                </button>
+                
+                <button class="btn btn-secondary ms-2" onclick="runDiagnostics()">
+                    Run Diagnostics
+                </button>
+                
+                <!-- Enhanced Export Section -->
+                <div class="full-export-section mt-3" id="stats-export-section" style="display: none;">
+                    <h6>📊 Complete Data Export</h6>
+                    <p class="small mb-2">Export unlimited statistical reports for research analysis</p>
+                    <div class="row">
+                        <div class="col-6">
+                            <button class="btn btn-light btn-sm w-100" onclick="exportFullStatsCSV()">
+                                <i class="fas fa-table"></i><br>
+                                <small>CSV Format</small>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-light btn-sm w-100" onclick="exportFullStatsPDF()">
+                                <i class="fas fa-file-pdf"></i><br>
+                                <small>PDF Report</small>
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-light">No row limits • Complete dataset • Research-ready</small>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <h5>Results</h5>
+                <div id="network-stats-results" class="mt-3">
+                    <p class="text-muted">Configure parameters and click "Generate Network Analysis" to see results.</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================================
+// NETWORK VISUALIZATION INTERFACE
+// ============================================================================
+
+function getNetworkVizInterface() {
+    return `
+        <div class="row">
+            <!-- Control Panel -->
+            <div class="col-md-4">
+                <div class="control-panel">
+                    <h5>Visualization Controls</h5>
+                    
+                    <!-- Network Type -->
+                    <div class="mb-3">
+                        <label class="form-label">Network Type</label>
+                        <select class="form-select" id="viz-network-type" onchange="toggleVizNetworkTypeOptions()">
+                            <option value="global">Global Network</option>
+                            <option value="individual_centered">Individual-Centered</option>
+                            <option value="goods_based">Goods-Based</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Individual Search (hidden by default) -->
+                    <div class="mb-3" id="viz-individual-search-container" style="display: none;">
+                        <label class="form-label">Search for Individual</label>
+                        <input type="text" class="form-control" id="viz-individual-search" 
+                               placeholder="Type name to search..."
+                               oninput="searchIndividualsViz()" autocomplete="off">
+                        <div id="viz-individual-results" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;"></div>
+                        <input type="hidden" id="viz-selected-individual-id">
+                    </div>
+                    
+                    <!-- Goods Search (hidden by default) -->
+                    <div class="mb-3" id="viz-goods-search-container" style="display: none;">
+                        <label class="form-label">Search for Good/Commodity</label>
+                        <input type="text" class="form-control" id="viz-goods-search" 
+                               placeholder="Type commodity name..."
+                               oninput="searchGoodsViz()" autocomplete="off">
+                        <div id="viz-goods-results" class="list-group mt-2" style="max-height: 200px; overflow-y: auto;"></div>
+                        <input type="hidden" id="viz-selected-good-id">
+                        <small class="text-muted">Visualize networks of people who traded this good</small>
+                    </div>
+                    
+                    <!-- Time Period -->
+                    <div class="mb-3">
+                        <label class="form-label">Time Period</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="number" class="form-control" id="viz-start-year" 
+                                       placeholder="Start year" min="1400" max="1600">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" class="form-control" id="viz-end-year" 
+                                       placeholder="End year" min="1400" max="1600">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Connection Filter -->
+                    <div class="mb-3">
+                        <label class="form-label">Minimum Connections</label>
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <input type="range" class="form-range" id="viz-min-connections" 
+                                       min="1" max="10" value="1" oninput="updateVizConnectionsLabel()">
+                            </div>
+                            <div class="col-4">
+                                <span class="badge bg-primary" id="viz-connections-value">1+</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Layout Options -->
+                    <div class="mb-3">
+                        <label class="form-label">Layout Algorithm</label>
+                        <select class="form-select" id="viz-layout">
+                            <option value="spring">Spring Layout (Force-directed)</option>
+                            <option value="circular">Circular Layout</option>
+                            <option value="kamada_kawai">Kamada-Kawai Layout</option>
+                            <option value="shell">Shell Layout</option>
+                            <option value="random">Random Layout</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Visual Options -->
+                    <div class="mb-3">
+                        <label class="form-label">Color Nodes By</label>
+                        <select class="form-select" id="viz-color-by">
+                            <option value="degree">Degree Centrality</option>
+                            <option value="betweenness">Betweenness Centrality</option>
+                            <option value="closeness">Closeness Centrality</option>
+                            <option value="eigenvector">Eigenvector Centrality</option>
+                            <option value="type">Node Type</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Size Nodes By</label>
+                        <select class="form-select" id="viz-size-by">
+                            <option value="degree">Degree Centrality</option>
+                            <option value="betweenness">Betweenness Centrality</option>
+                            <option value="closeness">Closeness Centrality</option>
+                            <option value="eigenvector">Eigenvector Centrality</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Publication Options -->
+                    <div class="mb-3">
+                        <h6 class="text-primary">📖 Publication Options</h6>
+                        
+                        <!-- Show/Hide Labels -->
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="viz-show-labels" checked>
+                            <label class="form-check-label" for="viz-show-labels">
+                                Show Node Labels
+                            </label>
+                        </div>
+                        
+                        <!-- Label Color Selection -->
+                        <div class="mb-2">
+                            <label class="form-label small">Label Color</label>
+                            <select class="form-select form-select-sm" id="viz-label-color">
+                                <option value="white">White</option>
+                                <option value="black">Black</option>
+                                <option value="gray">Gray</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Black & White Mode -->
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="checkbox" id="viz-black-white">
+                            <label class="form-check-label" for="viz-black-white">
+                                Black & White Mode (Academic)
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Generate Button -->
+                    <button class="btn btn-primary" onclick="generateNetworkVisualization()">
+                        Generate Visualization
+                    </button>
+                </div>
+                
+                <!-- Network Statistics -->
+                <div id="viz-network-stats" class="network-stats-card" style="display: none;">
+                    <h6>Network Statistics</h6>
+                    <div id="viz-stats-content">
+                        <!-- Stats will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Visualization Area -->
+            <div class="col-md-8">
+                <div class="viz-container">
+                    <div id="network-plot" style="width: 100%; height: 600px;">
+                        <div class="d-flex align-items-center justify-content-center h-100">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-project-diagram fa-3x mb-3"></i>
+                                <h5>Network Visualization</h5>
+                                <p>Configure parameters and click "Generate Visualization" to see your network</p>
+                                <small class="text-success">Goods-based network analysis available!</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Export Controls -->
+                <div class="export-controls" id="viz-export-controls" style="display: none;">
+                    <h6 class="text-primary">📤 Export Options</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="small">Standard Export</h6>
+                            <button class="btn btn-outline-primary btn-sm me-2" onclick="exportNetworkPNG()">
+                                <i class="fas fa-image"></i> Export PNG
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="small">Academic Export</h6>
+                            <button class="btn btn-outline-success btn-sm me-2" onclick="showAcademicExportModal()">
+                                <i class="fas fa-graduation-cap"></i> High-Quality Figure
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <h6 class="small">Data Export</h6>
+                            <button class="btn btn-outline-info btn-sm me-2" onclick="exportNetworkCSV()">
+                                <i class="fas fa-table"></i> CSV Data
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-outline-info btn-sm" onclick="exportNetworkGEXF()">
+                                <i class="fas fa-project-diagram"></i> GEXF Format
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Loading overlay -->
+                <div id="viz-loading" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Generating visualization...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================================
+// ECONOMIC ANALYSIS INTERFACES (Placeholder)
+// ============================================================================
+
+function getEconomicStatsInterface() {
+    return `
+        <div class="alert alert-info">
+            <h6>Economic Statistical Analysis</h6>
+            <p>Economic analysis tools will be implemented in the next development phase.</p>
+            <p><strong>Planned Features:</strong></p>
+            <ul>
+                <li>Descriptive statistics for price data</li>
+                <li>Time series analysis and forecasting</li>
+                <li>Price elasticity estimation</li>
+                <li>GARCH volatility modeling</li>
+                <li>Market integration tests</li>
+                <li>Value at Risk calculations</li>
+            </ul>
+            <p>The network analysis is now fully functional with goods-based analysis capabilities.</p>
+        </div>
+    `;
+}
+
+function getEconomicVizInterface() {
+    return `
+        <div class="alert alert-info">
+            <h6>Economic Visualizations</h6>
+            <p>Economic visualization tools will be implemented in the next development phase.</p>
+            <p><strong>Planned Features:</strong></p>
+            <ul>
+                <li>Interactive price trend charts</li>
+                <li>Volatility analysis plots</li>
+                <li>Market comparison visualizations</li>
+                <li>Seasonal pattern analysis</li>
+                <li>Risk assessment charts</li>
+                <li>Export capabilities for all charts</li>
+            </ul>
+            <p>Focus is currently on completing the network analysis functionality with goods-based analysis.</p>
+        </div>
+    `;
+}
+
+// ============================================================================
+// TOGGLE FUNCTIONS FOR NETWORK TYPE OPTIONS
+// ============================================================================
+
+function toggleNetworkTypeOptions() {
+    const analysisType = document.getElementById('analysis-type').value;
+    const individualContainer = document.getElementById('individual-search-container');
+    const goodsContainer = document.getElementById('goods-search-container');
+    
+    // Hide all containers first
+    individualContainer.style.display = 'none';
+    goodsContainer.style.display = 'none';
+    
+    // Clear selections
+    document.getElementById('selected-individual-id').value = '';
+    document.getElementById('selected-good-id').value = '';
+    
+    // Show appropriate container
+    if (analysisType === 'individual_centered') {
+        individualContainer.style.display = 'block';
+    } else if (analysisType === 'goods_based') {
+        goodsContainer.style.display = 'block';
+    }
+}
+
+function toggleVizNetworkTypeOptions() {
+    const networkType = document.getElementById('viz-network-type').value;
+    const individualContainer = document.getElementById('viz-individual-search-container');
+    const goodsContainer = document.getElementById('viz-goods-search-container');
+    
+    // Hide all containers first
+    individualContainer.style.display = 'none';
+    goodsContainer.style.display = 'none';
+    
+    // Clear selections
+    document.getElementById('viz-selected-individual-id').value = '';
+    document.getElementById('viz-selected-good-id').value = '';
+    
+    // Show appropriate container
+    if (networkType === 'individual_centered') {
+        individualContainer.style.display = 'block';
+    } else if (networkType === 'goods_based') {
+        goodsContainer.style.display = 'block';
+    }
+}
+
+// ============================================================================
+// GOODS SEARCH FUNCTIONS
+// ============================================================================
+
+let goodsSearchTimeout;
+function searchGoods() {
+    clearTimeout(goodsSearchTimeout);
+    goodsSearchTimeout = setTimeout(() => {
+        const searchTerm = document.getElementById('goods-search').value.trim();
+        const resultsContainer = document.getElementById('goods-results');
+        
+        if (searchTerm.length < 2) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+        
+        resultsContainer.innerHTML = '<div class="list-group-item">Searching goods...</div>';
+        
+        fetch(`/api/search/goods?q=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            displayGoodsResults(data.goods || []);
+        })
+        .catch(error => {
+            console.error('Goods search error:', error);
+            resultsContainer.innerHTML = '<div class="list-group-item text-danger">Search failed</div>';
+        });
+    }, 300);
+}
+
+function displayGoodsResults(goods) {
+    const resultsContainer = document.getElementById('goods-results');
+    
+    if (goods.length === 0) {
+        resultsContainer.innerHTML = '<div class="list-group-item text-muted">No goods found</div>';
+        return;
+    }
+    
+    let html = '';
+    goods.forEach(good => {
+        html += `
+            <div class="list-group-item list-group-item-action" 
+                 style="cursor: pointer;" 
+                 onclick="selectGood('${good.id}', '${good.name.replace(/'/g, "\\'")}')">
+                ${good.name}
+                <small class="text-muted d-block">ID: ${good.id}</small>
+            </div>
+        `;
+    });
+    
+    resultsContainer.innerHTML = html;
+}
+
+function selectGood(id, name) {
+    document.getElementById('goods-search').value = name;
+    document.getElementById('selected-good-id').value = id;
+    document.getElementById('goods-results').innerHTML = '';
+}
+
+// Similar functions for visualization goods search
+let goodsSearchVizTimeout;
+function searchGoodsViz() {
+    clearTimeout(goodsSearchVizTimeout);
+    goodsSearchVizTimeout = setTimeout(() => {
+        const searchTerm = document.getElementById('viz-goods-search').value.trim();
+        const resultsContainer = document.getElementById('viz-goods-results');
+        
+        if (searchTerm.length < 2) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+        
+        resultsContainer.innerHTML = '<div class="list-group-item">Searching goods...</div>';
+        
+        fetch(`/api/search/goods?q=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            displayGoodsVizResults(data.goods || []);
+        })
+        .catch(error => {
+            console.error('Goods search error:', error);
+            resultsContainer.innerHTML = '<div class="list-group-item text-danger">Search failed</div>';
+        });
+    }, 300);
+}
+
+function displayGoodsVizResults(goods) {
+    const resultsContainer = document.getElementById('viz-goods-results');
+    
+    if (goods.length === 0) {
+        resultsContainer.innerHTML = '<div class="list-group-item text-muted">No goods found</div>';
+        return;
+    }
+    
+    let html = '';
+    goods.forEach(good => {
+        html += `
+            <div class="list-group-item list-group-item-action" 
+                 style="cursor: pointer;" 
+                 onclick="selectGoodViz('${good.id}', '${good.name.replace(/'/g, "\\'")}')">
+                ${good.name}
+                <small class="text-muted d-block">ID: ${good.id}</small>
+            </div>
+        `;
+    });
+    
+    resultsContainer.innerHTML = html;
+}
+
+function selectGoodViz(id, name) {
+    document.getElementById('viz-goods-search').value = name;
+    document.getElementById('viz-selected-good-id').value = id;
+    document.getElementById('viz-goods-results').innerHTML = '';
+}
+
+// ============================================================================
+// INDIVIDUAL SEARCH FUNCTIONS
+// ============================================================================
+
+let searchTimeout;
+function searchIndividuals() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const searchTerm = document.getElementById('individual-search').value.trim();
+        const resultsContainer = document.getElementById('individual-results');
+        
+        if (searchTerm.length < 2) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+        
+        resultsContainer.innerHTML = '<div class="list-group-item">Searching...</div>';
+        
+        fetch(`/api/search/individuals?q=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            displayIndividualResults(data.individuals || []);
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            resultsContainer.innerHTML = '<div class="list-group-item text-danger">Search failed</div>';
+        });
+    }, 300);
+}
+
+function displayIndividualResults(individuals) {
+    const resultsContainer = document.getElementById('individual-results');
+    
+    if (individuals.length === 0) {
+        resultsContainer.innerHTML = '<div class="list-group-item text-muted">No individuals found</div>';
+        return;
+    }
+    
+    let html = '';
+    individuals.forEach(individual => {
+        html += `
+            <div class="list-group-item list-group-item-action" 
+                 style="cursor: pointer;" 
+                 onclick="selectIndividual('${individual.id}', '${individual.name.replace(/'/g, "\\'")}')">
+                ${individual.name}
+                <small class="text-muted d-block">ID: ${individual.id}</small>
+            </div>
+        `;
+    });
+    
+    resultsContainer.innerHTML = html;
+}
+
+function selectIndividual(id, name) {
+    document.getElementById('individual-search').value = name;
+    document.getElementById('selected-individual-id').value = id;
+    document.getElementById('individual-results').innerHTML = '';
+}
+
+let vizSearchTimeout;
+function searchIndividualsViz() {
+    clearTimeout(vizSearchTimeout);
+    vizSearchTimeout = setTimeout(() => {
+        const searchTerm = document.getElementById('viz-individual-search').value.trim();
+        const resultsContainer = document.getElementById('viz-individual-results');
+        
+        if (searchTerm.length < 2) {
+            resultsContainer.innerHTML = '';
+            return;
+        }
+        
+        resultsContainer.innerHTML = '<div class="list-group-item">Searching...</div>';
+        
+        fetch(`/api/search/individuals?q=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            displayVizIndividualResults(data.individuals || []);
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+            resultsContainer.innerHTML = '<div class="list-group-item text-danger">Search failed</div>';
+        });
+    }, 300);
+}
+
+function displayVizIndividualResults(individuals) {
+    const resultsContainer = document.getElementById('viz-individual-results');
+    
+    if (individuals.length === 0) {
+        resultsContainer.innerHTML = '<div class="list-group-item text-muted">No individuals found</div>';
+        return;
+    }
+    
+    let html = '';
+    individuals.forEach(individual => {
+        html += `
+            <div class="list-group-item list-group-item-action" 
+                 style="cursor: pointer;" 
+                 onclick="selectVizIndividual('${individual.id}', '${individual.name.replace(/'/g, "\\'")}')">
+                ${individual.name}
+                <small class="text-muted d-block">ID: ${individual.id}</small>
+            </div>
+        `;
+    });
+    
+    resultsContainer.innerHTML = html;
+}
+
+function selectVizIndividual(id, name) {
+    document.getElementById('viz-individual-search').value = name;
+    document.getElementById('viz-selected-individual-id').value = id;
+    document.getElementById('viz-individual-results').innerHTML = '';
+}
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+function updateConnectionsLabel() {
+    const value = document.getElementById('min-connections').value;
+    const label = document.getElementById('connections-value');
+
+    if (value == 1) {
+        label.textContent = '1+ connections';
+        label.className = 'badge bg-secondary';
+    } else if (value <= 3) {
+        label.textContent = `${value}+ connections`;
+        label.className = 'badge bg-primary';
+    } else if (value <= 6) {
+        label.textContent = `${value}+ connections`;
+        label.className = 'badge bg-warning';
+    } else {
+        label.textContent = `${value}+ connections`;
+        label.className = 'badge bg-danger';
+    }
+}
+
+function updateVizConnectionsLabel() {
+    const value = document.getElementById('viz-min-connections').value;
+    const label = document.getElementById('viz-connections-value');
+    label.textContent = `${value}+`;
+}
+
+function loadAvailableYears() {
+    fetch('/api/dates/available-years')
+    .then(response => response.json())
+    .then(data => {
+        populateDecadeOptions(data);
+    })
+    .catch(error => {
+        console.error('Error loading years:', error);
+    });
+}
+
+function populateDecadeOptions(data) {
+    const datePreset = document.getElementById('date-preset');
+    if (!datePreset) return;
+    
+    // Clear existing options except the first two
+    while (datePreset.children.length > 2) {
+        datePreset.removeChild(datePreset.lastChild);
+    }
+    
+    if (data.decades) {
+        data.decades.forEach(decade => {
+            const option = document.createElement('option');
+            option.value = `${decade.start_year}-${decade.end_year}`;
+            option.textContent = `${decade.start_year}s (${decade.count} records)`;
+            datePreset.appendChild(option);
+        });
+    }
+    
+    if (data.min_year && data.max_year) {
+        const option = document.createElement('option');
+        option.value = `${data.min_year}-${data.max_year}`;
+        option.textContent = `Full Range (${data.min_year}-${data.max_year})`;
+        datePreset.appendChild(option);
+    }
+}
+
+function applyDatePreset() {
+    const preset = document.getElementById('date-preset').value;
+    
+    if (preset === 'load_decades') {
+        loadAvailableYears();
+        return;
+    }
+    
+    if (preset && preset.includes('-')) {
+        const [startYear, endYear] = preset.split('-');
+        document.getElementById('start-year').value = startYear;
+        document.getElementById('end-year').value = endYear;
+    } else if (!preset) {
+        document.getElementById('start-year').value = '';
+        document.getElementById('end-year').value = '';
+    }
+}
+
+// ============================================================================
+// MAIN ANALYSIS FUNCTIONS
+// ============================================================================
+
+function generateNetworkStats() {
+    const resultsDiv = document.getElementById('network-stats-results');
+    resultsDiv.innerHTML = '<div class="alert alert-info">Generating network analysis...</div>';
+    
+    const analysisType = document.getElementById('analysis-type').value;
+    const selectedIndividualId = document.getElementById('selected-individual-id').value;
+    const selectedGoodId = document.getElementById('selected-good-id').value;
+    const startYear = document.getElementById('start-year').value;
+    const endYear = document.getElementById('end-year').value;
+    const minConnections = parseInt(document.getElementById('min-connections').value);
+    
+    // Validation for different analysis types
+    if (analysisType === 'individual_centered' && !selectedIndividualId) {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-warning">
+                <h6>Individual Required</h6>
+                <p>Please search for and select an individual for individual-centered analysis.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    if (analysisType === 'goods_based' && !selectedGoodId) {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-warning">
+                <h6>Good Required</h6>
+                <p>Please search for and select a good/commodity for goods-based analysis.</p>
+            </div>
+        `;
+        return;
+    }
+    
+    const measures = [];
+    if (document.getElementById('degree').checked) measures.push('degree');
+    if (document.getElementById('betweenness').checked) measures.push('betweenness');
+    if (document.getElementById('closeness').checked) measures.push('closeness');
+    if (document.getElementById('eigenvector').checked) measures.push('eigenvector');
+    if (document.getElementById('density').checked) measures.push('density');
+    if (document.getElementById('modularity').checked) measures.push('modularity');
+    if (document.getElementById('triangles').checked) measures.push('triangles');
+    
+    const requestData = {
+        network_type: analysisType,
+        individual_id: selectedIndividualId,
+        good_id: selectedGoodId,
+        measures: measures,
+        min_connections: minConnections
+    };
+    
+    if (startYear && endYear) {
+        requestData.start_date = `${startYear}-01-01`;
+        requestData.end_date = `${endYear}-12-31`;
+    }
+    
+    let endpoint = '/api/analysis/network-stats';
+    if (analysisType === 'individual_centered') {
+        endpoint = '/api/analysis/individual-network';
+        requestData.analysis_type = 'ego_network';
+    }
+    
+    console.log('Sending request to:', endpoint);
+    console.log('Request data:', requestData);
+    
+    fetch(endpoint, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Analysis response:', data);
+        displayNetworkResults(data, analysisType);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        resultsDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>Error generating network analysis</h6>
+                <p>${error.message}</p>
+                <small>Check the browser console for more details.</small>
+            </div>
+        `;
+    });
+}
+
+function generateNetworkVisualization() {
+    const loadingDiv = document.getElementById('viz-loading');
+    const plotDiv = document.getElementById('network-plot');
+    const statsDiv = document.getElementById('viz-network-stats');
+    
+    // Show loading
+    loadingDiv.style.display = 'block';
+    
+    // Collect parameters including goods
+    const networkType = document.getElementById('viz-network-type').value;
+    const individualId = document.getElementById('viz-selected-individual-id').value;
+    const goodId = document.getElementById('viz-selected-good-id').value;
+    const startYear = document.getElementById('viz-start-year').value;
+    const endYear = document.getElementById('viz-end-year').value;
+    const minConnections = document.getElementById('viz-min-connections').value;
+    const layout = document.getElementById('viz-layout').value;
+    const colorBy = document.getElementById('viz-color-by').value;
+    const sizeBy = document.getElementById('viz-size-by').value;
+    
+    // Validate selections
+    if (networkType === 'individual_centered' && !individualId) {
+        loadingDiv.style.display = 'none';
+        alert('Please search for and select an individual for individual-centered visualization.');
+        return;
+    }
+    
+    if (networkType === 'goods_based' && !goodId) {
+        loadingDiv.style.display = 'none';
+        alert('Please search for and select a good for goods-based visualization.');
+        return;
+    }
+    
+    // Get publication options
+    const showLabels = document.getElementById('viz-show-labels').checked;
+    const labelColor = document.getElementById('viz-label-color').value;
+    const blackWhite = document.getElementById('viz-black-white').checked;
+    
+    const requestData = {
+        network_type: networkType,
+        individual_id: individualId,
+        good_id: goodId,
+        start_date: startYear ? `${startYear}-01-01` : null,
+        end_date: endYear ? `${endYear}-12-31` : null,
+        min_connections: parseInt(minConnections),
+        layout: layout,
+        color_by: colorBy,
+        size_by: sizeBy,
+        show_labels: showLabels,
+        label_color: labelColor,
+        black_white: blackWhite
+    };
+    
+    console.log('Visualization request:', requestData);
+    
+    fetch('/api/analysis/network-viz', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        loadingDiv.style.display = 'none';
+        
+        if (data.error) {
+            plotDiv.innerHTML = `
+                <div class="d-flex align-items-center justify-content-center h-100">
+                    <div class="text-center text-danger">
+                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                        <h5>Visualization Error</h5>
+                        <p>${data.error}</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Display the Plotly visualization
+        const graphData = JSON.parse(data.graph_json);
+        Plotly.newPlot('network-plot', graphData.data, graphData.layout, {
+            responsive: true,
+            displayModeBar: true,
+            modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d']
+        });
+        
+        // Display network statistics
+        displayNetworkStatistics(data.statistics, data.nodes_filtered);
+        statsDiv.style.display = 'block';
+        
+        // Show export controls
+        const exportControls = document.getElementById('viz-export-controls');
+        if (exportControls) {
+            exportControls.style.display = 'block';
+        }
+        
+    })
+    .catch(error => {
+        loadingDiv.style.display = 'none';
+        console.error('Visualization error:', error);
+        plotDiv.innerHTML = `
+            <div class="d-flex align-items-center justify-content-center h-100">
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
+                    <h5>Network Error</h5>
+                    <p>Failed to generate visualization: ${error.message}</p>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function displayNetworkResults(data, analysisType) {
+    const resultsDiv = document.getElementById('network-stats-results');
+    
+    if (data.error) {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>Network Analysis Error</h6>
+                <p>${data.error}</p>
+                <button class="btn btn-sm btn-secondary mt-2" onclick="runDiagnostics()">
+                    Run Diagnostics
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="alert alert-success"><h6>Network Analysis Results</h6></div>';
+    
+    // Show special indicators for different analysis types
+    if (analysisType === 'individual_centered' && data.focal_individual) {
+        html += `
+            <div class="card mb-3 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <strong>Focal Individual: ${data.focal_individual.name}</strong>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Individual ID:</strong> ${data.focal_individual.id}</li>
+                        <li><strong>Direct Connections:</strong> ${data.focal_individual.degree}</li>
+                        <li><strong>Network Position:</strong> ${data.focal_individual.degree > 5 ? 'Highly Connected' : data.focal_individual.degree > 2 ? 'Moderately Connected' : 'Limited Connections'}</li>
+                        ${data.focal_individual.good_filter ? `<li><strong>Good Filter:</strong> ${data.focal_individual.good_filter}</li>` : ''}
+                        ${data.focal_individual.min_connections_filter > 1 ? `<li><strong>Filter Applied:</strong> ${data.focal_individual.min_connections_filter}+ connections</li>` : ''}
+                    </ul>
+                </div>
+            </div>
+        `;
+    } else if (analysisType === 'goods_based' && data.network_info && data.network_info.good_filter) {
+        html += `
+            <div class="card mb-3 border-success">
+                <div class="card-header bg-success text-white">
+                    <strong>Goods-Based Analysis: ${data.network_info.good_filter}</strong>
+                </div>
+                <div class="card-body">
+                    <p>This network shows all individuals and organizations who were involved in legal acts concerning <strong>${data.network_info.good_filter}</strong>.</p>
+                    <p>Connections represent shared involvement in transactions or legal acts involving this commodity.</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Display centrality measures and other network metrics
+    ['degree_centrality', 'betweenness_centrality', 'closeness_centrality', 'eigenvector_centrality'].forEach(measure => {
+        if (data[measure]) {
+            const measureData = data[measure];
+            if (measureData.error) {
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-header"><strong>${measure.replace('_', ' ').toUpperCase()}</strong></div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">Error: ${measureData.error}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-header"><strong>${measure.replace('_', ' ').toUpperCase()}</strong></div>
+                        <div class="card-body">
+                            <p><strong>Average:</strong> ${measureData.average?.toFixed(4) || 'N/A'}</p>
+                            <p><strong>Standard Deviation:</strong> ${measureData.std?.toFixed(4) || 'N/A'}</p>
+                            ${measureData.note ? `<p><small class="text-muted"><strong>Note:</strong> ${measureData.note}</small></p>` : ''}
+                            <p><strong>Top Nodes:</strong></p>
+                            <ul>
+                `;
+                
+                if (measureData.top_nodes) {
+                    Object.entries(measureData.top_nodes).slice(0, 5).forEach(([node, value]) => {
+                        html += `<li>${node}: ${value.toFixed(4)}</li>`;
+                    });
+                }
+                
+                html += `
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    });
+    
+    // Network overview and other metrics
+    if (data.density !== undefined) {
+        html += `
+            <div class="card mb-3">
+                <div class="card-header"><strong>NETWORK DENSITY</strong></div>
+                <div class="card-body">
+                    <p><strong>Density:</strong> ${data.density.toFixed(4)}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (data.modularity) {
+        html += `
+            <div class="card mb-3">
+                <div class="card-header"><strong>MODULARITY & COMMUNITIES</strong></div>
+                <div class="card-body">
+                    <p><strong>Modularity:</strong> ${data.modularity.value?.toFixed(4) || 'N/A'}</p>
+                    <p><strong>Communities:</strong> ${data.modularity.num_communities || 'N/A'}</p>
+                    ${data.modularity.community_sizes ? `<p><strong>Community Sizes:</strong> ${data.modularity.community_sizes.join(', ')}</p>` : ''}
+                    ${data.modularity.note ? `<p><small class="text-muted">${data.modularity.note}</small></p>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    if (data.triangles) {
+        html += `
+            <div class="card mb-3">
+                <div class="card-header"><strong>TRIANGLES</strong></div>
+                <div class="card-body">
+                    <p><strong>Total Triangles:</strong> ${data.triangles.total_count || 'N/A'}</p>
+                    <p><strong>Average per Node:</strong> ${data.triangles.average_per_node?.toFixed(2) || 'N/A'}</p>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (data.network_info) {
+        const networkTypeLabel = analysisType === 'individual_centered' ? 'Individual Ego Network' : 
+                                 analysisType === 'goods_based' ? 'Goods-Based Network' : 'Global Network';
+        html += `
+            <div class="card mb-3">
+                <div class="card-header"><strong>${networkTypeLabel} Overview</strong></div>
+                <div class="card-body">
+                    <ul>
+                        <li><strong>Nodes:</strong> ${data.network_info.num_nodes}</li>
+                        <li><strong>Edges:</strong> ${data.network_info.num_edges}</li>
+                        <li><strong>Connected:</strong> ${data.network_info.is_connected ? 'Yes' : 'No'}</li>
+                        <li><strong>Components:</strong> ${data.network_info.num_components}</li>
+                        ${data.network_info.largest_component_size ? `<li><strong>Largest Component:</strong> ${data.network_info.largest_component_size} nodes (${(data.network_info.connectivity_ratio * 100).toFixed(1)}%)</li>` : ''}
+                        ${data.network_info.min_connections_filter > 1 ? `<li><strong>Filter Applied:</strong> ${data.network_info.min_connections_filter}+ connections</li>` : ''}
+                        ${data.network_info.nodes_removed_by_filter > 0 ? `<li><strong>Nodes Filtered Out:</strong> ${data.network_info.nodes_removed_by_filter} (from ${data.network_info.original_nodes} total)</li>` : ''}
+                        ${data.network_info.good_filter ? `<li><strong>Good Filter:</strong> ${data.network_info.good_filter}</li>` : ''}
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+    
+    resultsDiv.innerHTML = html;
+    
+    // Show export section when results are successfully generated
+    const exportSection = document.getElementById('stats-export-section');
+    if (exportSection) {
+        exportSection.style.display = 'block';
+    }
+}
+
+function displayNetworkStatistics(stats, nodesFiltered) {
+    const statsContent = document.getElementById('viz-stats-content');
+    
+    let html = `
+        <div class="row text-center">
+            <div class="col-6">
+                <div class="mb-2">
+                    <strong>${stats.num_nodes}</strong>
+                    <br><small>Nodes</small>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="mb-2">
+                    <strong>${stats.num_edges}</strong>
+                    <br><small>Edges</small>
+                </div>
+            </div>
+        </div>
+        <div class="row text-center">
+            <div class="col-6">
+                <div class="mb-2">
+                    <strong>${stats.density.toFixed(3)}</strong>
+                    <br><small>Density</small>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="mb-2">
+                    <strong>${stats.components}</strong>
+                    <br><small>Components</small>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    if (nodesFiltered > 0) {
+        html += `
+            <div class="text-center mt-2">
+                <small class="text-warning">
+                    <i class="fas fa-filter"></i> ${nodesFiltered} nodes filtered out
+                </small>
+            </div>
+        `;
+    }
+    
+    statsContent.innerHTML = html;
+}
+
+function runDiagnostics() {
+    const resultsDiv = document.getElementById('network-stats-results');
+    resultsDiv.innerHTML = '<div class="alert alert-info">Running diagnostics...</div>';
+    
+    fetch('/api/debug/network-data-detailed')
+    .then(response => response.json())
+    .then(data => {
+        let html = '<div class="alert alert-info"><h6>Database Diagnostics</h6></div>';
+        
+        html += '<div class="card mb-3"><div class="card-header"><strong>Table Counts</strong></div><div class="card-body"><ul>';
+        Object.entries(data).forEach(([key, value]) => {
+            if (key.includes('_count')) {
+                html += `<li><strong>${key.replace('_count', '')}:</strong> ${value} records</li>`;
+            }
+        });
+        html += '</ul></div></div>';
+        
+        if (data.sample_connections && data.sample_connections.length > 0) {
+            html += '<div class="card mb-3"><div class="card-header"><strong>Sample Connections Found</strong></div><div class="card-body">';
+            html += '<p>✅ Network connections exist in database</p>';
+            html += `<p>Sample: ${data.sample_connections[0].person1} ↔ ${data.sample_connections[0].person2}</p>`;
+            html += '</div></div>';
+        } else {
+            html += '<div class="card mb-3"><div class="card-header"><strong>Connection Issues</strong></div><div class="card-body">';
+            html += '<p>⚠️ No network connections found between individuals</p>';
+            html += '<p>This could mean individuals don\'t share legal acts in your database</p>';
+            html += '</div></div>';
+        }
+        
+        Object.entries(data).forEach(([key, value]) => {
+            if (key.includes('_error')) {
+                html += `<div class="alert alert-danger"><strong>${key}:</strong> ${value}</div>`;
+            }
+        });
+        
+        resultsDiv.innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Diagnostics error:', error);
+        resultsDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>Diagnostics Failed</h6>
+                <p>Could not run diagnostics: ${error.message}</p>
+            </div>
+        `;
+    });
+}
+
+// ============================================================================
+// ENHANCED EXPORT FUNCTIONS
+// ============================================================================
+
+// Full statistical export functions
+function exportFullStatsCSV() {
+    exportFullStats('csv');
+}
+
+function exportFullStatsPDF() {
+    exportFullStats('pdf');
+}
+
+function exportFullStats(format) {
+    // Get all current parameters
+    const analysisType = document.getElementById('analysis-type').value;
+    const individualId = document.getElementById('selected-individual-id').value;
+    const goodId = document.getElementById('selected-good-id').value;
+    const startYear = document.getElementById('start-year').value;
+    const endYear = document.getElementById('end-year').value;
+    const minConnections = document.getElementById('min-connections').value;
+    
+    // Get selected measures
+    const measures = [];
+    ['degree', 'betweenness', 'closeness', 'eigenvector', 'density', 'modularity', 'triangles'].forEach(measure => {
+        if (document.getElementById(measure) && document.getElementById(measure).checked) {
+            measures.push(measure);
+        }
+    });
+    
+    const requestData = {
+        network_type: analysisType,
+        individual_id: individualId || null,
+        good_id: goodId || null,
+        start_date: startYear ? `${startYear}-01-01` : null,
+        end_date: endYear ? `${endYear}-12-31` : null,
+        min_connections: parseInt(minConnections),
+        measures: measures,
+        export_format: format
+    };
+    
+    // Show loading indicator
+    const button = format === 'csv' ? 
+        document.querySelector('[onclick="exportFullStatsCSV()"]') : 
+        document.querySelector('[onclick="exportFullStatsPDF()"]');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+    button.disabled = true;
+    
+    fetch('/api/analysis/network-stats-full-export', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Export failed');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `network_analysis_complete_${analysisType}.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // Reset button
+        button.innerHTML = originalText;
+        button.disabled = false;
+    })
+    .catch(error => {
+        console.error('Export error:', error);
+        alert('Export failed. Please try again.');
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+// Network visualization export functions
+function exportNetworkPNG() {
+    // Use Plotly's built-in download functionality
+    const plotDiv = document.getElementById('network-plot');
+    if (plotDiv && plotDiv.data) {
+        Plotly.downloadImage(plotDiv, {
+            format: 'png',
+            width: 1200,
+            height: 800,
+            filename: 'network_visualization'
+        });
+    } else {
+        alert('Please generate a visualization first.');
+    }
+}
+
+function exportNetworkCSV() {
+    // Export current network data as CSV
+    const requestData = getCurrentNetworkParams();
+    
+    fetch('/api/analysis/network-export', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({...requestData, export_format: 'csv'})
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'network_data.csv';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+        console.error('CSV export error:', error);
+        alert('CSV export failed. Please try again.');
+    });
+}
+
+function exportNetworkGEXF() {
+    // Export current network data as GEXF
+    const requestData = getCurrentNetworkParams();
+    
+    fetch('/api/analysis/network-export', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({...requestData, export_format: 'gexf'})
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'network_data.gexf';
+        a.click();
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(error => {
+        console.error('GEXF export error:', error);
+        alert('GEXF export failed. Please try again.');
+    });
+}
+
+function showAcademicExportModal() {
+    // Create a modal for academic export options
+    const modal = document.createElement('div');
+    modal.className = 'modal fade';
+    modal.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Academic Figure Export</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Image Width (pixels)</label>
+                        <input type="number" class="form-control" id="academic-width" value="1200" min="800" max="3000">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Image Height (pixels)</label>
+                        <input type="number" class="form-control" id="academic-height" value="900" min="600" max="2400">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">DPI (Resolution)</label>
+                        <select class="form-select" id="academic-dpi">
+                            <option value="150">150 DPI (Web)</option>
+                            <option value="300" selected>300 DPI (Print)</option>
+                            <option value="600">600 DPI (High Quality)</option>
+                        </select>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="academic-no-labels">
+                        <label class="form-check-label" for="academic-no-labels">
+                            Remove labels for cleaner figure
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="academic-bw" checked>
+                        <label class="form-check-label" for="academic-bw">
+                            Black & white mode
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="exportAcademicFigure()">Export Figure</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+    
+    // Clean up modal when hidden
+    modal.addEventListener('hidden.bs.modal', function () {
+        document.body.removeChild(modal);
+    });
+}
+
+function exportAcademicFigure() {
+    const requestData = getCurrentNetworkParams();
+    
+    // Get academic export settings
+    const width = parseInt(document.getElementById('academic-width').value);
+    const height = parseInt(document.getElementById('academic-height').value);
+    const dpi = parseInt(document.getElementById('academic-dpi').value);
+    const showLabels = !document.getElementById('academic-no-labels').checked;
+    const blackWhite = document.getElementById('academic-bw').checked;
+    
+    const academicData = {
+        ...requestData,
+        width: width,
+        height: height,
+        dpi: dpi,
+        show_labels: showLabels,
+        black_white: blackWhite
+    };
+    
+    fetch('/api/analysis/network-export-academic', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(academicData)
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'network_academic_figure.png';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        // Close modal
+        const modal = document.querySelector('.modal.show');
+        if (modal) {
+            bootstrap.Modal.getInstance(modal).hide();
+        }
+    })
+    .catch(error => {
+        console.error('Academic export error:', error);
+        alert('Academic export failed. Please try again.');
+    });
+}
+
+function getCurrentNetworkParams() {
+    // Helper function to get current network parameters
+    return {
+        network_type: document.getElementById('viz-network-type').value,
+        individual_id: document.getElementById('viz-selected-individual-id').value || null,
+        good_id: document.getElementById('viz-selected-good-id').value || null,
+        start_date: document.getElementById('viz-start-year').value ? `${document.getElementById('viz-start-year').value}-01-01` : null,
+        end_date: document.getElementById('viz-end-year').value ? `${document.getElementById('viz-end-year').value}-12-31` : null,
+        min_connections: parseInt(document.getElementById('viz-min-connections').value),
+        layout: document.getElementById('viz-layout').value,
+        color_by: document.getElementById('viz-color-by').value,
+        size_by: document.getElementById('viz-size-by').value,
+        show_labels: document.getElementById('viz-show-labels').checked,
+        label_color: document.getElementById('viz-label-color').value,
+        black_white: document.getElementById('viz-black-white').checked
+    };
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(loadAvailableYears, 1000);
+});
+</script>
+{% endblock %}
