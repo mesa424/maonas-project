@@ -32,8 +32,8 @@ tenacity==9.1.2
 # Network analysis
 networkx==3.1
 
-# Statistical analysis libraries - COMPATIBLE VERSION
-scipy==1.13.1
+# Statistical analysis libraries - FIXED scipy version
+scipy==1.14.1
 statsmodels==0.14.0
 patsy==1.0.1
 arch==7.2.0
@@ -43,7 +43,7 @@ python-louvain==0.16
 
 # Utility libraries
 python-dateutil==2.9.0.post0
-pytz==2025.2
+pytz==2024.2
 tzdata==2025.2
 packaging==25.0
 
