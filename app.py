@@ -59,34 +59,35 @@ TABLE_DISPLAY_NAMES = {
 
 # Updated Database Connection Function
 def get_db_connection():
-    """Get database connection - supports both MySQL (local) and PostgreSQL (Railway)"""
+    """Get database connection - supports both MySQL (local) and Railway MySQL"""
     try:
-        # Check if we're using PostgreSQL (Railway production)
-        database_url = os.environ.get('DATABASE_URL')
-        if database_url and database_url.startswith('postgresql'):
-            # Use psycopg2 for PostgreSQL
-            import psycopg2
+        # Railway MySQL connection (production)
+        mysql_url = os.environ.get('MYSQL_URL') or os.environ.get('MYSQL_PUBLIC_URL')
+        
+        if mysql_url:
+            # Parse Railway MySQL URL: mysql://user:password@host:port/database
             from urllib.parse import urlparse
             
-            url = urlparse(database_url)
-            connection = psycopg2.connect(
+            url = urlparse(mysql_url)
+            connection = mysql.connector.connect(
                 host=url.hostname,
-                port=url.port,
-                database=url.path[1:],
+                port=url.port or 3306,
+                database=url.path[1:],  # Remove leading slash
                 user=url.username,
                 password=url.password
             )
             return connection
         else:
-            # Use MySQL connector for local development
-            DB_CONFIG = {
-                'host': os.environ.get('DB_HOST', 'localhost'),
-                'port': int(os.environ.get('DB_PORT', 3306)),
-                'database': os.environ.get('DB_DATABASE', 'maonas'),  # Using your .env variable name
-                'user': os.environ.get('DB_USER', 'root'),
-                'password': os.environ.get('DB_PASSWORD', 'Aa77aque.')
+            # Use individual Railway environment variables
+            mysql_config = {
+                'host': os.environ.get('MYSQLHOST', 'localhost'),
+                'port': int(os.environ.get('MYSQLPORT', 3306)),
+                'database': os.environ.get('MYSQLDATABASE', os.environ.get('MYSQL_DATABASE', 'maonas')),
+                'user': os.environ.get('MYSQLUSER', 'root'),
+                'password': os.environ.get('MYSQLPASSWORD', os.environ.get('MYSQL_ROOT_PASSWORD', 'Aa77aque.'))
             }
-            return mysql.connector.connect(**DB_CONFIG)
+            return mysql.connector.connect(**mysql_config)
+            
     except Exception as e:
         print(f"Database connection error: {e}")
         return None
@@ -288,6 +289,49 @@ def team():
 @beta_required
 def analysis_tools():
     return render_template('analysis_tools.html')
+
+@app.route('/debug/database')
+def debug_database():
+    """Debug route to test database connection"""
+    try:
+        connection = get_db_connection()
+        if connection:
+            cursor = connection.cursor()
+            cursor.execute("SELECT DATABASE() as current_db, VERSION() as version")
+            result = cursor.fetchone()
+            connection.close()
+            
+            connection_info = {
+                'status': 'success',
+                'database': result[0],
+                'version': result[1],
+                'host': os.environ.get('MYSQLHOST', 'localhost')
+            }
+        else:
+            connection_info = {'status': 'failed', 'error': 'Could not establish connection'}
+    except Exception as e:
+        connection_info = {'status': 'error', 'error': str(e)}
+    
+    # Show environment variables (without passwords)
+    env_info = {
+        'MYSQLHOST': os.environ.get('MYSQLHOST', 'Not Set'),
+        'MYSQLPORT': os.environ.get('MYSQLPORT', 'Not Set'),
+        'MYSQLDATABASE': os.environ.get('MYSQLDATABASE', 'Not Set'),
+        'MYSQLUSER': os.environ.get('MYSQLUSER', 'Not Set'),
+        'MYSQLPASSWORD': '***SET***' if os.environ.get('MYSQLPASSWORD') else 'Not Set',
+        'MYSQL_URL': '***SET***' if os.environ.get('MYSQL_URL') else 'Not Set',
+        'Environment': 'Railway' if os.environ.get('RAILWAY_ENVIRONMENT') else 'Local'
+    }
+    
+    return f"""
+    <h2>Database Connection Debug</h2>
+    <h3>Connection Test:</h3>
+    <pre>{connection_info}</pre>
+    
+    <h3>Environment Variables:</h3>
+    <pre>{env_info}</pre>
+    """
+    
 # ============================================================================
 # DATABASE API ROUTES
 # ============================================================================
@@ -2689,7 +2733,7 @@ def debug_price_data():
 
 if __name__ == '__main__':
     # Get port from environment variable (Railway sets this)
-    port = int(os.environ.get('PORT', 10000))
+    port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_ENV') == 'development'
     
     print("=" * 60)
@@ -2697,9 +2741,14 @@ if __name__ == '__main__':
     print("=" * 60)
     print(f"🌐 Port: {port}")
     print(f"🔧 Debug: {debug}")
-    print(f"🗃️ Database: {'PostgreSQL (Railway)' if os.environ.get('DATABASE_URL') else 'MySQL (Local)'}")
-    print("📊 Features: Social Network Analysis + Economic Tools")
-    print("🔒 Beta Protection: Enabled")
+    
+    # Show which database we're connecting to
+    if os.environ.get('MYSQLHOST'):
+        print(f"🗃️ Database: Railway MySQL ({os.environ.get('MYSQLHOST')})")
+    else:
+        print(f"🗃️ Database: Local MySQL")
+        
+    print(f"🔑 Beta Access: {'Enabled' if os.environ.get('BETA_PASSWORD') else 'Disabled'}")
     print("=" * 60)
     
     app.run(host='0.0.0.0', port=port, debug=debug)
